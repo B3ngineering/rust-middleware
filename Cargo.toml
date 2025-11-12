@@ -2,7 +2,6 @@
 members = [
 	"master",
 	"publisher",
-	"odom_publisher",
 	"subscriber",
 	"messages"
 ]

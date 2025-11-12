@@ -19,3 +19,27 @@ pub struct Odom {
     pub angular_velocity: f32,
 }
 
+#[derive(Debug, Clone)]
+pub enum Message {
+    Twist,
+    Odom,
+}
+
+impl Message {
+    // Convert from &str to Message enum
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s.to_lowercase().as_str() {
+            "twist" => Some(Message::Twist),
+            "odom" => Some(Message::Odom),
+            _ => None,
+        }
+    }
+
+    // Get default topic for each message type
+    pub fn default_topic(&self) -> &str {
+        match self {
+            Message::Twist => "/cmd_vel",
+            Message::Odom => "/odom",
+        }
+    }
+}

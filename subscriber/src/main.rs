@@ -1,18 +1,25 @@
 use std::net::{TcpListener, TcpStream};
 use std::io::{Read, Write};
 use std::time::Duration;
+use std::env;
 use bincode;
-use messages::{Twist, Odom};
+use messages::Message;
 
 
 fn main() {
-    println!("Hello, world!");
+    let args: Vec<String> = env::args().collect();
 
-    let topic = "/odom";
-    let addr = "127.0.0.1:9100";
+    let message_type = Message::from_str(&args[1]).unwrap();
+    let topic = args.get(2).map(|s| s.as_str()).unwrap_or(message_type.default_topic());
+    let port = args.get(3)
+        .and_then(|s| s.parse::<u16>().ok())
+        .unwrap_or(9100);
+
+    let addr = format!("127.0.0.1:{}", port);
+
+    println!("Subscribing to {} messages on topic: {}", args[1], topic);
 
     // Register with master
-    println!("Attempting to register with master...");
     loop {
         match TcpStream::connect("127.0.0.1:9000") {
             Ok(mut stream) => {
@@ -36,7 +43,7 @@ fn main() {
         }
     }
     // Listen for messages
-    let listener = TcpListener::bind(addr).unwrap();
+    let listener = TcpListener::bind(&addr).unwrap();
     println!("Subscriber listening on {}", addr);
 
     // For incoming messages, read to buffer and display
@@ -44,7 +51,15 @@ fn main() {
         let mut stream = incoming.unwrap();
         let mut buf = [0u8; 1024];
         let n = stream.read(&mut buf).unwrap();
-        let msg: Odom = bincode::deserialize(&buf[..n]).unwrap();
-        println!("[SUB] Received Twist: {:?}", msg);
+        match message_type {
+            Message::Twist => {
+                let twist: messages::Twist = bincode::deserialize(&buf[..n]).unwrap();
+                println!("[SUB] Received {:?}: {:?}", message_type, twist);
+            }
+            Message::Odom => {
+                let odom: messages::Odom = bincode::deserialize(&buf[..n]).unwrap();
+                println!("[SUB] Received {:?}: {:?}", message_type, odom);
+            }
+        }
     }
 }
