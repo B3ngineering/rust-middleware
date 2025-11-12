@@ -1,11 +1,14 @@
 use std::net::{TcpListener, TcpStream};
 use std::io::{Read, Write};
 use std::time::Duration;
+use bincode;
+use messages::{Twist, Odom};
+
 
 fn main() {
     println!("Hello, world!");
 
-    let topic = "/cmd_vel";
+    let topic = "/odom";
     let addr = "127.0.0.1:9100";
 
     // Register with master
@@ -41,7 +44,7 @@ fn main() {
         let mut stream = incoming.unwrap();
         let mut buf = [0u8; 1024];
         let n = stream.read(&mut buf).unwrap();
-        let msg = String::from_utf8_lossy(&buf[..n]);
-        println!("[SUB] Received {}: {}", topic, msg);
+        let msg: Odom = bincode::deserialize(&buf[..n]).unwrap();
+        println!("[SUB] Received Twist: {:?}", msg);
     }
 }

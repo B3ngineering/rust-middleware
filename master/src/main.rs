@@ -15,7 +15,7 @@ fn handle_client(mut stream: TcpStream, topics: &mut HashMap<String, Vec<String>
     // This converts our input into a list of words 
     let parts: Vec<&str> = input.trim().split_whitespace().collect();
     
-    // Parts will either be a subscriber, topic, address or publisher, topic
+    // Parts will either be a subscriber, topic, address or publisher
     // Based on which it is, we'll perform a specific action with match
     match parts.as_slice() {
 
@@ -26,7 +26,7 @@ fn handle_client(mut stream: TcpStream, topics: &mut HashMap<String, Vec<String>
                 .or_default()
                 .push(addr.to_string());
             // Close connection after registration
-            drop(stream);
+            drop(stream);   
         }
 
         // Adds subscriber addresses to response, and sends it back to the client
@@ -49,7 +49,6 @@ fn handle_client(mut stream: TcpStream, topics: &mut HashMap<String, Vec<String>
 }
 
 fn main() {
-    println!("Hello, world!");
 
     // Creating a new TcpListener instance and a map for each topics
     let listener = TcpListener::bind("127.0.0.1:9000").unwrap();
